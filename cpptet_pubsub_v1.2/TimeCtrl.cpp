@@ -15,13 +15,13 @@ void TimeCtrl::handle(Msg *msg)
   notifySubs(&key_msg);
 }
 
-void TimeCtrl::run() 
+void TimeCtrl::run()
 {
   //win->printw(name + ".run() begins.\n");
   Msg *msg;
   while (true) {
     mtx.lock();
-    if (que.empty()) 
+    if (que.empty())
       msg = NULL;
     else {
       msg = que.front();
@@ -34,6 +34,7 @@ void TimeCtrl::run()
 	    break;
 
     handle(msg);
+    delete msg;
   }
   //win->printw(name + ".run() ends.\n");
-};
+}
