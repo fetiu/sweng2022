@@ -40,7 +40,7 @@ int T6D0[] = { 1, 1, 0, 0, 1, 1, 0, 0, 0, -1 };//Z
 int T6D1[] = { 0, 0, 1, 0, 1, 1, 0, 1, 0, -1 };
 int T6D2[] = { 0, 0, 0, 1, 1, 0, 0, 1, 1, -1 };
 int T6D3[] = { 0, 1, 0, 1, 1, 0, 1, 0, 0, -1 };
- 
+
 int *setOfCBlockArrays[] = {
   T0D0, T0D1, T0D2, T0D3,
   T1D0, T1D1, T1D2, T1D3,
@@ -72,7 +72,7 @@ Model::Model(Window *w, string n, bool record_mode, bool replay_mode): omsg(MSG_
   state = TetrisState::NewBlock;
   if (mode == ModelMode::RECORD)
     srand((unsigned int)time(NULL));
-};
+}
 
 void Model::output_message(char key)
 {
@@ -99,8 +99,10 @@ void Model::handle(Msg *msg)
     return;
 
   char key = msg->key;
-  if (key == 'q') 
+  if (key == 'q') {
+    output_message(key);
     shutdown_whole_graph();
+  }
 
   if (state == TetrisState::NewBlock && mode == ModelMode::RECORD)
     handle_newblock();
