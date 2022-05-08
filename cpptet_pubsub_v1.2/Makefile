@@ -2,7 +2,7 @@
 CC=g++
 CFLAGS=-g -I. -fpermissive -lncursesw
 LDFLAGS=
-MAIN_OBJS=main.o Matrix.o Window.o MsgPubSub.o View.o Model.o TimeCtrl.o KbdCtrl.o ttymodes.o Tetris.o CTetris.o Record.o
+MAIN_OBJS=main.o Matrix.o Window.o MsgPubSub.o View.o Model.o TimeCtrl.o KbdCtrl.o ttymodes.o Tetris.o CTetris.o Record.o Replay.o
 
 all:: main.exe
 
@@ -15,5 +15,5 @@ main.exe: $(MAIN_OBJS)
 %.o: %.cpp $(DEPS)
 	$(CC) -c -pthread -o $@ $< $(CFLAGS)
 
-clean: 
+clean:
 	rm -f *.exe *.o *~ *.stackdump
