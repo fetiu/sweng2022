@@ -2,12 +2,18 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <iostream>
 
 #include "Window.h"
 #include "View.h"
 #include "Model.h"
 #include "TimeCtrl.h"
 #include "KbdCtrl.h"
+#if 1
+#include "Record.h"
+#endif
+
+using namespace std;
 
 vector<Sub*> sub_list;
 Msg msg_end(MSG_END, 0, NULL);
@@ -36,7 +42,7 @@ void shutdown_whole_graph()
 {
   sleep(1);
    // send a self-terminating msg to each task
-  for (int i=0; i < sub_list.size(); i++) 
+  for (int i=0; i < sub_list.size(); i++)
 	  sub_list[i]->update(&msg_end);
 }
 
@@ -44,6 +50,31 @@ int main(int argc, char *argv[])
 {
   vector<thread*> task_list;
   thread *task;
+
+#if 1 // added by khkim
+  string str_record = "record";
+  string str_replay = "replay";
+  bool record_mode = false;
+  bool replay_mode = false;
+
+  if (argc != 2) {
+    cout << "usage: " << argv[0] << " [record/replay]" << endl;
+    exit(1);
+  }
+
+  if (str_record.compare(argv[1]) == 0) {
+    record_mode = true;
+    cout << "record mode on!" << endl;
+  }
+  else if (str_replay.compare(argv[1]) == 0) {
+    replay_mode = true;
+    cout << "replay mode on!" << endl;
+  }
+  else {
+    cout << "usage: " << argv[0] << " [record/replay]" << endl;
+    exit(1);
+  }
+#endif 
 
   init_screen();
 
@@ -56,7 +87,13 @@ int main(int argc, char *argv[])
   // create tasks to compose a graph
   View *left_view = new View(&left_win, &bttm_win, "left_view");
   sub_list.push_back(left_view);
+#if 1 // added by khkim
+  Record *left_record = new Record(&bttm_win, "left_record");
+  sub_list.push_back(left_record);
+  Model *left_model = new Model(&bttm_win, "left_model", record_mode, replay_mode);
+#else
   Model *left_model = new Model(&bttm_win, "left_model");
+#endif
   sub_list.push_back(left_model);
   TimeCtrl *time_ctrl = new TimeCtrl(&bttm_win, "time_ctrl");
   sub_list.push_back(time_ctrl);
@@ -64,11 +101,18 @@ int main(int argc, char *argv[])
   sub_list.push_back(kbd_ctrl);
 
   // connect tasks to compose the graph
+#if 1 // added by khkim
+  left_model->addSubs(left_record);
+#endif
   left_model->addSubs(left_view);
   time_ctrl->addSubs(left_model);
   kbd_ctrl->addSubs(left_model);
 
   // run a thread for each task
+#if 1 // added by khkim
+  task = new thread(&Record::run, left_record);
+  task_list.push_back(task);
+#endif
   task = new thread(&View::run, left_view);
   task_list.push_back(task);
   task = new thread(&Model::run, left_model);

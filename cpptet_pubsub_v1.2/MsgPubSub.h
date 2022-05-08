@@ -10,10 +10,25 @@
 #define MSG_END (-1)
 #define MSG_KEY  (1)
 #define MSG_MAT (2)
+#define MSG_KEY_MAT (MSG_KEY | MSG_MAT)
 
 class Msg {
  public:
   Msg(int w, char k, Matrix *m) { what = w; key = k; mat = m; }
+#if 1 // added by khkim
+  Msg(Msg *msg) { // copy constructor
+    what = msg->what; 
+    key = msg->key; 
+    if (msg->mat != NULL)
+      mat = new Matrix(msg->mat);  // deep copy
+    else
+      mat = NULL;
+  } 
+  ~Msg() {  // destructor
+    if (mat != NULL) 
+      delete mat; 
+  }
+#endif
   int what; // 1 (MSG_KEY), 2 (MSG_MAT)
   char key;
   Matrix *mat;

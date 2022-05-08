@@ -2,7 +2,7 @@
 CC=g++
 CFLAGS=-g -I. -fpermissive -lncursesw
 LDFLAGS=
-MAIN_OBJS=main.o Matrix.o Window.o MsgPubSub.o View.o Model.o TimeCtrl.o KbdCtrl.o ttymodes.o Tetris.o CTetris.o
+MAIN_OBJS=main.o Matrix.o Window.o MsgPubSub.o View.o Model.o TimeCtrl.o KbdCtrl.o ttymodes.o Tetris.o CTetris.o Record.o
 
 all:: main.exe
 

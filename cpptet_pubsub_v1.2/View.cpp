@@ -9,12 +9,16 @@ View::View(Window *w_main, Window *w_con, string n)
 
 void View::handle(Msg *msg)
 {
-  win->printw(name + ".handle() called.\n");
+  //win->printw(name + ".handle() called.\n");
+
+  if ((msg->what & MSG_MAT) != MSG_MAT) // added by khkim
+    return;
+
   Matrix *m = msg->mat;
   int dy = m->get_dy();
   int dx = m->get_dx();
   int **array = m->get_array();
-  mwin->clear();
+  mwin->dowclear();
 
   for (int y = 0; y < dy; y++) {
     for (int x = 0; x < dx; x++) {
@@ -28,7 +32,8 @@ void View::handle(Msg *msg)
     cout << endl;
   }
 
-  mwin->refresh();
+  mwin->dowrefresh();
+  win->dowrefresh(); // added by khkim
 }
 
 

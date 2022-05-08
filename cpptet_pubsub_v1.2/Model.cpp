@@ -53,59 +53,64 @@ int *setOfCBlockArrays[] = {
 
 extern void shutdown_whole_graph();
 
-Model::Model(Window *w, string n): omsg(MSG_MAT, 0, NULL)
+Model::Model(Window *w, string n, bool record_mode, bool replay_mode): omsg(MSG_MAT, 0, NULL)
 {
-  TetrisState state;
-  char key;
-
   win = w;
   name = n;
+  if (record_mode ^ replay_mode == 0) {
+    win->printw("Model: either RECORD or REPLAY can be specified!!");
+    shutdown_whole_graph();
+  }
+
+  if (record_mode)
+    mode = ModelMode::RECORD;
+  else if (replay_mode)
+    mode = ModelMode::REPLAY;
 
   CTetris::init(setOfCBlockArrays, MAX_BLK_TYPES, MAX_BLK_DEGREES);
   board = new CTetris(BOARD_HEIGHT, BOARD_WIDTH);
-  srand((unsigned int)time(NULL));
-  key = (char)('0' + rand() % MAX_BLK_TYPES);
-
-  state = board->accept(key);
-  if (state == Finished) {
-    win->printw("Model: The first tetris block causes the game to be terminated!!");
-    shutdown_whole_graph();
-  }
+  state = TetrisState::NewBlock;
+  if (mode == ModelMode::RECORD)
+    srand((unsigned int)time(NULL));
 };
+
+void Model::output_message(char key)
+{
+    omsg.what = MSG_KEY_MAT;
+    omsg.mat = board->oCScreen->clip(0, board->iScreenDw, BOARD_HEIGHT, board->iScreenDw+BOARD_WIDTH);
+    omsg.key = key;
+    notifySubs(&omsg);
+}
+
+void Model::handle_newblock(void)
+{
+    char key = (char)('0' + rand() % MAX_BLK_TYPES);
+    state = board->accept(key);
+    output_message(key);
+    if (state == TetrisState::Finished) {
+      win->printw("Model: Game over!!\n");
+      shutdown_whole_graph();
+    }
+}
 
 void Model::handle(Msg *msg)
 {
-  TetrisState state;
-  char key;
-  //win->printw(name + ".handle() called.\n");
+  if ((msg->what & MSG_KEY) != MSG_KEY)
+    return;
 
-  if (msg->what == MSG_KEY) {
-    win->printw(name + ": key = " + msg->key + "\n");
+  char key = msg->key;
+  if (key == 'q') 
+    shutdown_whole_graph();
 
-    key = msg->key;
-    if (key == 'q') 
-      shutdown_whole_graph();
+  if (state == TetrisState::NewBlock && mode == ModelMode::RECORD)
+    handle_newblock();
 
-    state = board->accept(key);
-    omsg.mat = board->oCScreen->clip(0, board->iScreenDw, BOARD_HEIGHT, board->iScreenDw+BOARD_WIDTH);
-    notifySubs(&omsg);
-    if (state == NewBlock) {
-      key = (char)('0' + rand() % MAX_BLK_TYPES);
-      state = board->accept(key);
-      omsg.mat = board->oCScreen->clip(0, board->iScreenDw, BOARD_HEIGHT, board->iScreenDw+BOARD_WIDTH);
-      notifySubs(&omsg);
-      if (state == Finished) {
-        win->printw("Model: Game over!!");
-        shutdown_whole_graph();
-      }
-    }
-    //omsg.mat = new Matrix(arrayScreen, 20, 15);
-    //notifySubs(&omsg);
-  }
+  //win->printw(name + ": key = " + key + "\n");
+  state = board->accept(key);
+  output_message(key);
+
+  if (state == TetrisState::NewBlock && mode == ModelMode::RECORD)
+    handle_newblock();
+
 }
 
-
-
-
-
- 
