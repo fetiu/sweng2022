@@ -15,7 +15,7 @@ void Record::handle(Msg *msg)
 
   char key = msg->key;
   win->printw(name + ": key = " + key + "\n");
-  fout << key << endl;
+  fout << key << flush;
 }
 
 
