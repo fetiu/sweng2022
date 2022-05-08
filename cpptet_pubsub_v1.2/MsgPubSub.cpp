@@ -1,6 +1,6 @@
 #include "MsgPubSub.h"
 
-void Sub::update(Msg *m) 
+void Sub::update(Msg *m)
 {
 #if 1 // added by khkim
   Msg *m_copy = new Msg(m);
@@ -16,14 +16,14 @@ void Sub::update(Msg *m)
 #endif
 }
 
-void Sub::run() 
+void Sub::run()
 {
   //win->printw(name + ".run() begins.\n");
   while (true) {
     unique_lock<mutex> uqlck(mtx);
     if (que.empty())
       cv.wait(uqlck, [&]{ return !que.empty(); } );
-    
+
     Msg *msg = que.front();
     que.pop();
     uqlck.unlock();
@@ -33,21 +33,21 @@ void Sub::run()
 	    break;
 
     handle(msg);
-  
+
 #if 1 // added by khkim
-    delete msg; 
+    delete msg;
 #endif
   }
   //win->printw(name + ".run() ends.\n");
-};
+}
 
-void Pub::addSubs(Sub* sub) 
+void Pub::addSubs(Sub* sub)
 {
   subs[nsubs] = sub;
   nsubs++;
 }
-  
-void Pub::notifySubs(Msg *m) 
+
+void Pub::notifySubs(Msg *m)
 {
   for(int i=0; i < nsubs; i++)
     subs[i]->update(m);
