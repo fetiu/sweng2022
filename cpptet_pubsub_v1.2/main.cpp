@@ -12,19 +12,20 @@
 #if 1
 #include "Record.h"
 #endif
+#include "Replay.h"
 
 using namespace std;
 
 vector<Sub*> sub_list;
 Msg msg_end(MSG_END, 0, NULL);
 
-void init_screen() 
+void init_screen()
 {
   setlocale(LC_ALL, ""); // for printing a box character
   initscr();         // initialize the curses screen
   start_color(); // start using colors
   // init_pair(index, fg color, bg color);
-  init_pair(1, COLOR_RED,     COLOR_BLACK); 
+  init_pair(1, COLOR_RED,     COLOR_BLACK);
   init_pair(2, COLOR_GREEN,   COLOR_BLACK);
   init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
   init_pair(4, COLOR_BLUE,    COLOR_BLACK);
@@ -33,7 +34,7 @@ void init_screen()
   init_pair(7, COLOR_WHITE,   COLOR_BLACK);
 }
 
-void close_screen() 
+void close_screen()
 {
   endwin();
 }
@@ -46,7 +47,7 @@ void shutdown_whole_graph()
 	  sub_list[i]->update(&msg_end);
 }
 
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
   vector<thread*> task_list;
   thread *task;
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
     cout << "usage: " << argv[0] << " [record/replay]" << endl;
     exit(1);
   }
-#endif 
+#endif
 
   init_screen();
 
@@ -88,13 +89,19 @@ int main(int argc, char *argv[])
   View *left_view = new View(&left_win, &bttm_win, "left_view");
   sub_list.push_back(left_view);
 #if 1 // added by khkim
-  Record *left_record = new Record(&bttm_win, "left_record");
-  sub_list.push_back(left_record);
+  Record *left_record = NULL;
+  // Guard to avoid recreatig record.txt on replay mode
+  if (record_mode) {
+    left_record = new Record(&bttm_win, "left_record");
+    sub_list.push_back(left_record);
+  }
   Model *left_model = new Model(&bttm_win, "left_model", record_mode, replay_mode);
 #else
   Model *left_model = new Model(&bttm_win, "left_model");
 #endif
   sub_list.push_back(left_model);
+  Replay *left_replay = new Replay(&bttm_win, "left_replay");
+  sub_list.push_back(left_replay);
   TimeCtrl *time_ctrl = new TimeCtrl(&bttm_win, "time_ctrl");
   sub_list.push_back(time_ctrl);
   KbdCtrl *kbd_ctrl = new KbdCtrl(&bttm_win, "kbd_ctrl");
@@ -102,16 +109,24 @@ int main(int argc, char *argv[])
 
   // connect tasks to compose the graph
 #if 1 // added by khkim
-  left_model->addSubs(left_record);
+  if (left_record) {
+    left_model->addSubs(left_record);
+  }
 #endif
   left_model->addSubs(left_view);
-  time_ctrl->addSubs(left_model);
-  kbd_ctrl->addSubs(left_model);
+  if (replay_mode) {
+    left_replay->addSubs(left_model);
+  } else {
+    time_ctrl->addSubs(left_model);
+    kbd_ctrl->addSubs(left_model);
+  }
 
   // run a thread for each task
 #if 1 // added by khkim
-  task = new thread(&Record::run, left_record);
-  task_list.push_back(task);
+  if (left_record) {
+    task = new thread(&Record::run, left_record);
+    task_list.push_back(task);
+  }
 #endif
   task = new thread(&View::run, left_view);
   task_list.push_back(task);
@@ -121,6 +136,8 @@ int main(int argc, char *argv[])
   task_list.push_back(task);
   task = new thread(&KbdCtrl::run, kbd_ctrl);
   task_list.push_back(task);
+  task = new thread(&Replay::run, left_replay);
+  task_list.push_back(task);
 
   // message flow begins...
   //sleep(10);
@@ -129,8 +146,8 @@ int main(int argc, char *argv[])
   //shutdown_whole_graph();
 
   // wait for each task to be terminated
-  for (int i=0; i < task_list.size(); i++) 
-	  task_list[i]->join(); 
+  for (int i=0; i < task_list.size(); i++)
+	  task_list[i]->join();
 
   close_screen();
 
