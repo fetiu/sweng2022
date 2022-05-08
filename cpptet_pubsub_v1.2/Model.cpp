@@ -98,18 +98,18 @@ void Model::handle(Msg *msg)
   if ((msg->what & MSG_KEY) != MSG_KEY)
     return;
 
-  char key = msg->key;
-  if (key == 'q') {
-    output_message(key);
-    shutdown_whole_graph();
-  }
-
   if (state == TetrisState::NewBlock && mode == ModelMode::RECORD)
     handle_newblock();
 
+  char key = msg->key;
   //win->printw(name + ": key = " + key + "\n");
   state = board->accept(key);
   output_message(key);
+
+  // check game quit after output_message
+  // in order to save last 'q' into record.txt
+  if (key == 'q')
+    shutdown_whole_graph();
 
   if (state == TetrisState::NewBlock && mode == ModelMode::RECORD)
     handle_newblock();
