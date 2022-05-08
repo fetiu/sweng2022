@@ -21,13 +21,13 @@ bool KbdCtrl::isStdinReadable(void)
   return FD_ISSET(STDIN_FILENO, &rdfs);
 }
 
-char KbdCtrl::getChar()
+char KbdCtrl::getChar() 
 {
   extern int tty_cbreak(int fd);
   extern int tty_reset(int fd);
   char ch = -1;
   int n;
-
+  
   //while (true) {
   tty_cbreak(0);
   if (isStdinReadable()) {
@@ -58,13 +58,13 @@ void KbdCtrl::handle(Msg *msg)
   }
 }
 
-void KbdCtrl::run()
+void KbdCtrl::run() 
 {
   //win->printw(name + ".run() begins.\n");
   Msg *msg;
   while (true) {
     mtx.lock();
-    if (que.empty())
+    if (que.empty()) 
       msg = NULL;
     else {
       msg = que.front();

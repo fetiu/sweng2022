@@ -90,7 +90,7 @@ Matrix *Matrix::clip(int top, int left, int bottom, int right) {
 	  (top + y < dy) && (left + x < dx))
 	temp->array[y][x] = array[top + y][left + x];
       else {
-	cerr << "invalid matrix range";
+	cerr << "invalid matrix range: (" << top << "," << left << "," << bottom << "," << right << ")" << endl;
 	return NULL;
       }
     }

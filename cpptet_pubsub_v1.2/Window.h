@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mutex>
-#include <curses.h>
+#include <ncursesw/curses.h>
 
 using namespace std;
 
@@ -15,10 +15,12 @@ class Window {
   
  public:
   Window(WINDOW *w);
-  void clear();
   void addStr(int y, int x, const char *s); // add a plain string
   void addCstr(int y, int x, const char *s, int color); // add a colored string
   void printw(string s);
-  void refresh();
+  void dorefresh();
+  void dowrefresh();
+  void doclear();
+  void dowclear();
 };
 
