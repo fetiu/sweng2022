@@ -1,10 +1,10 @@
 #include "Record.h"
 
-Record::Record(Window *w, string n) 
+Record::Record(Window *w, string n): fout("record.txt")
 {
   win = w;
   name = n;
-};
+}
 
 void Record::handle(Msg *msg)
 {
@@ -15,6 +15,7 @@ void Record::handle(Msg *msg)
 
   char key = msg->key;
   win->printw(name + ": key = " + key + "\n");
+  fout << key << endl;
 }
 
 
