@@ -108,7 +108,7 @@ void Model::handle(Msg *msg)
 
   // check game quit after output_message
   // in order to save last 'q' into record.txt
-  if (key == 'q')
+  if (key == 'q' || state == TetrisState::Finished)
     shutdown_whole_graph();
 
   if (state == TetrisState::NewBlock && mode == ModelMode::RECORD)
