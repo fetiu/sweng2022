@@ -54,7 +54,7 @@ int *setOfCBlockArrays[] = {
 extern void shutdown_whole_graph();
 Window *g_win = NULL;
 
-Model::Model(Window *w, string n, bool record_mode, bool replay_mode) //: omsg(MSG_MAT, 0, NULL, NULL)
+Model::Model(Window *w, string n, bool record_mode, bool replay_mode, Keymaps *keymaps)
 {
   win = w;
   name = n;
@@ -67,6 +67,9 @@ Model::Model(Window *w, string n, bool record_mode, bool replay_mode) //: omsg(M
     mode = ModelMode::RECORD;
   else if (replay_mode)
     mode = ModelMode::REPLAY;
+
+  if (keymaps != NULL)
+    custom_keymaps = *keymaps;
 
   CTetris::init(setOfCBlockArrays, MAX_BLK_TYPES, MAX_BLK_DEGREES);
   board = new CTetris(BOARD_HEIGHT, BOARD_WIDTH);
@@ -123,6 +126,11 @@ void Model::handle(Msg *msg)
   if (key == 'q') {
     output_message(key);
     shutdown_whole_graph();
+  }
+
+  if (!custom_keymaps.empty()) {
+    // convert keys based on keymap (defaults to '\0' for unmapped keys)
+    key = custom_keymaps[key];
   }
 
   if (state == TetrisState::NewBlock && mode == ModelMode::RECORD)

@@ -95,7 +95,15 @@ int main(int argc, char *argv[])
   Model *left_model = new Model(&bttm_win, "left_model", record_mode, replay_mode);
   sub_list.push_back(left_model);
 
-  Model *right_model = new Model(&bttm_win, "right_model", record_mode, replay_mode);
+  Keymaps right_keymaps = {
+      {'j', 'a'},
+      {'l', 'd'},
+      {'k', 's'},
+      {'i', 'w'},
+      {'\r', ' '},
+  };
+
+  Model *right_model = new Model(&bttm_win, "right_model", record_mode, replay_mode, &right_keymaps);
   sub_list.push_back(right_model);
 
   Record *left_record;

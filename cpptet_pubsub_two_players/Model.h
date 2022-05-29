@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 
 #include "MsgPubSub.h"
 #include "Window.h"
@@ -11,6 +12,8 @@ enum class ModelMode {
 };
 #endif
 
+typedef map<char, char> Keymaps;
+
 class Model: public Sub, public Pub {
  private:
   Window *win; // console window
@@ -20,10 +23,11 @@ class Model: public Sub, public Pub {
   ModelMode mode;
   TetrisState state;
 #endif
+  Keymaps custom_keymaps;
 
  public:
 #if 1 // added by khkim
-  Model(Window *w, string n, bool record_mode, bool replay_mode);
+  Model(Window *w, string n, bool record_mode, bool replay_mode, Keymaps *keymaps=NULL);
 #else
   Model(Window *w, string n);
 #endif
