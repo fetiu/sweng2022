@@ -4,6 +4,7 @@ TimeCtrl::TimeCtrl(Window *w, string n): key_msg(MSG_KEY, 's', NULL, NULL)
 {
   win = w;
   name = n;
+  key_msg.from = MsgPubId::TIME_CTRL;
 };
 
 //Msg key_msg(MSG_KEY, 's', NULL);

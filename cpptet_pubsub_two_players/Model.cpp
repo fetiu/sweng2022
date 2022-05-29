@@ -128,7 +128,8 @@ void Model::handle(Msg *msg)
     shutdown_whole_graph();
   }
 
-  if (!custom_keymaps.empty()) {
+  // Apply custom keymaps only for the messages sent from KBD_CTRL
+  if (!custom_keymaps.empty() && msg->from == MsgPubId::KBD_CTRL) {
     // convert keys based on keymap (defaults to '\0' for unmapped keys)
     key = custom_keymaps[key];
   }

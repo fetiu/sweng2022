@@ -4,6 +4,7 @@ KbdCtrl::KbdCtrl(Window *w, string n): omsg(MSG_KEY, 0, NULL, NULL)
 {
   win = w;
   name = n;
+  omsg.from = MsgPubId::KBD_CTRL;
 }
 
 bool KbdCtrl::isStdinReadable(void)

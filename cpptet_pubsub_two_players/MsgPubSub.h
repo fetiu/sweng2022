@@ -12,13 +12,24 @@
 #define MSG_MAT (2)
 #define MSG_KEY_MAT (MSG_KEY | MSG_MAT)
 
+enum class MsgPubId {
+  UNKNOWN,
+  KBD_CTRL,
+  TIME_CTRL
+};
+
 class Msg {
  public:
-  Msg(int w, char k, Matrix *m, Matrix *m2) { what = w; key = k; mat = m; mat2 = m2; }
+  Msg(int w, char k, Matrix *m, Matrix *m2) {
+    from = MsgPubId::UNKNOWN;
+    what = w; key = k;
+    mat = m; mat2 = m2;
+  }
 #if 1 // added by khkim
   Msg(Msg *msg) { // copy constructor
-    what = msg->what; 
-    key = msg->key; 
+    from = msg->from;
+    what = msg->what;
+    key = msg->key;
     if (msg->mat != NULL)
       mat = new Matrix(msg->mat);  // deep copy
     else
@@ -36,6 +47,7 @@ class Msg {
       delete mat2; 
   }
 #endif
+  MsgPubId from;
   int what; // 1 (MSG_KEY), 2 (MSG_MAT)
   char key;
   Matrix *mat; // for oCScreen
