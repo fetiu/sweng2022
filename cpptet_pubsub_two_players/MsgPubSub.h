@@ -10,12 +10,15 @@
 #define MSG_END (-1)
 #define MSG_KEY  (1)
 #define MSG_MAT (2)
+#define MSG_MAT2 (4)
 #define MSG_KEY_MAT (MSG_KEY | MSG_MAT)
+#define MSG_KEY_MAT_MAT2 (MSG_KEY_MAT | MSG_MAT2)
 
 enum class MsgPubId {
   UNKNOWN,
   KBD_CTRL,
-  TIME_CTRL
+  TIME_CTRL,
+  MODEL
 };
 
 class Msg {

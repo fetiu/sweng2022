@@ -92,13 +92,12 @@ void printwMatrix(Matrix *m) {
 void Model::output_message(char key)
 {
     Msg omsg(MSG_KEY_MAT, 0, NULL, NULL);
-    omsg.what = MSG_KEY_MAT;
+    omsg.from = MsgPubId::MODEL;
     omsg.mat = board->oCScreen->clip(0, board->iScreenDw, BOARD_HEIGHT, board->iScreenDw+BOARD_WIDTH);
     //win->printw("Model: state = " + to_string(state)  + "\n");
     if (state == TetrisState::RunningWDeletion) {
       omsg.mat2 = new Matrix(board->oDeletedCLines);
-      // printwMatrix(board->oDeletedCLines);
-      // board->accept(board->oDeletedCLines);
+      omsg.what = MSG_MAT2;
     }
     else
       omsg.mat2 = NULL;
@@ -119,6 +118,12 @@ void Model::handle_newblock(void)
 
 void Model::handle(Msg *msg)
 {
+  if (msg->from == MsgPubId::MODEL) {
+    if ((msg->what & MSG_MAT2) == MSG_MAT2)
+      state = board->accept(msg->mat2);
+    return;
+  }
+
   if ((msg->what & MSG_KEY) != MSG_KEY)
     return;
 

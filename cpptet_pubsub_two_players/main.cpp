@@ -132,8 +132,10 @@ int main(int argc, char *argv[])
     left_model->addSubs(left_record);
     time_ctrl->addSubs(left_model);
     kbd_ctrl->addSubs(left_model);
+    right_model->addSubs(left_model);
     time_ctrl->addSubs(right_model);
     kbd_ctrl->addSubs(right_model);
+    left_model->addSubs(right_model);
   }
   else if (replay_mode)
     left_replay->addSubs(left_model);
