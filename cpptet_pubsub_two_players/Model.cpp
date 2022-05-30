@@ -97,7 +97,7 @@ void Model::output_message(char key)
     //win->printw("Model: state = " + to_string(state)  + "\n");
     if (state == TetrisState::RunningWDeletion) {
       omsg.mat2 = new Matrix(board->oDeletedCLines);
-      omsg.what = MSG_MAT2;
+      omsg.what = MSG_KEY_MAT_MAT2;
     }
     else
       omsg.mat2 = NULL;
@@ -118,13 +118,12 @@ void Model::handle_newblock(void)
 
 void Model::handle(Msg *msg)
 {
-  if (msg->from == MsgPubId::MODEL) {
-    if ((msg->what & MSG_MAT2) == MSG_MAT2)
-      state = board->accept(msg->mat2);
-    return;
-  }
+  // process deleted lines received from another model
+  if ((msg->what & MSG_MAT2) == MSG_MAT2)
+    state = board->accept(msg->mat2);
 
-  if ((msg->what & MSG_KEY) != MSG_KEY)
+  // process received keys except the ones echo'd from another model
+  if ((msg->what & MSG_KEY) != MSG_KEY || msg->from == MsgPubId::MODEL)
     return;
 
   char key = msg->key;
