@@ -15,6 +15,6 @@ class Record: public Sub {
   ofstream fout;
 
  public:
-  Record(Window *w, string n);
+  Record(Window *w, string n, string path="record.txt");
   void handle(Msg *msg);
 };

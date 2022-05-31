@@ -1,6 +1,6 @@
 #include "Replay.h"
 
-Replay::Replay(Window *w, string n): fin("record.txt")
+Replay::Replay(Window *w, string n, string path): fin(path)
 {
   win = w;
   name = n;

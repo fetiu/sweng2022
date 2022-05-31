@@ -1,6 +1,6 @@
 #include "Record.h"
 
-Record::Record(Window *w, string n): fout("record.txt")
+Record::Record(Window *w, string n, string path): fout(path)
 {
   win = w;
   name = n;

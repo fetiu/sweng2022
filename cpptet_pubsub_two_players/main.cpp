@@ -107,12 +107,16 @@ int main(int argc, char *argv[])
   sub_list.push_back(right_model);
 
   Record *left_record;
+  Record *right_record;
   TimeCtrl *time_ctrl;
   KbdCtrl *kbd_ctrl;
   Replay *left_replay;
+  Replay *right_replay;
   if (record_mode) {
     left_record = new Record(&bttm_win, "left_record");
     sub_list.push_back(left_record);
+    right_record = new Record(&bttm_win, "right_record", "record2.txt");
+    sub_list.push_back(right_record);
     time_ctrl = new TimeCtrl(&bttm_win, "time_ctrl");
     sub_list.push_back(time_ctrl);
     kbd_ctrl = new KbdCtrl(&bttm_win, "kbd_ctrl");
@@ -121,6 +125,8 @@ int main(int argc, char *argv[])
   else if (replay_mode) {
     left_replay = new Replay(&bttm_win, "left_replay");
     sub_list.push_back(left_replay);    
+    right_replay = new Replay(&bttm_win, "right_replay", "record2.txt");
+    sub_list.push_back(right_replay);
   }
 #endif
 
@@ -133,12 +139,17 @@ int main(int argc, char *argv[])
     time_ctrl->addSubs(left_model);
     kbd_ctrl->addSubs(left_model);
     right_model->addSubs(left_model);
+    right_model->addSubs(right_record);
     time_ctrl->addSubs(right_model);
     kbd_ctrl->addSubs(right_model);
     left_model->addSubs(right_model);
   }
-  else if (replay_mode)
+  else if (replay_mode) {
     left_replay->addSubs(left_model);
+    right_model->addSubs(left_model);
+    right_replay->addSubs(right_model);
+    left_model->addSubs(right_model);
+  }
 #endif
 
   // run a thread for each task
@@ -154,6 +165,8 @@ int main(int argc, char *argv[])
   if (record_mode) {
     task = new thread(&Record::run, left_record);
     task_list.push_back(task);
+    task = new thread(&Record::run, right_record);
+    task_list.push_back(task);
     task = new thread(&TimeCtrl::run, time_ctrl);
     task_list.push_back(task);
     task = new thread(&KbdCtrl::run, kbd_ctrl);
@@ -161,6 +174,8 @@ int main(int argc, char *argv[])
   }
   else if (replay_mode) {
     task = new thread(&Replay::run, left_replay);
+    task_list.push_back(task);
+    task = new thread(&Replay::run, right_replay);
     task_list.push_back(task);
   }
 #endif

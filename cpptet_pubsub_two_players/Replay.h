@@ -12,7 +12,7 @@ class Replay: public Sub, public Pub {
   ifstream fin;
 
  public:
-  Replay(Window *w, string n);
+  Replay(Window *w, string n, string path="record.txt");
   void run();
   void handle(Msg *msg);
 };
