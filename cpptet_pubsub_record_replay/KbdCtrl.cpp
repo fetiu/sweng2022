@@ -1,6 +1,6 @@
 #include "KbdCtrl.h"
 
-KbdCtrl::KbdCtrl(Window *w, string n): omsg(MSG_KEY, 0, NULL, NULL, n)
+KbdCtrl::KbdCtrl(Window *w, string n): omsg(MSG_KEY, 0, NULL)
 {
   win = w;
   name = n;

@@ -17,7 +17,7 @@ void Replay::handle(Msg *msg)
   char key;
   // add noskipws for space(block drop) key
   fin >> noskipws >> key;
-  Msg omsg(MSG_KEY, key, NULL, NULL, name);
+  Msg omsg(MSG_KEY, key, NULL);
   notifySubs(&omsg); // omsg will be copied
 }
 

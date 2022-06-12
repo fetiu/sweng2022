@@ -1,6 +1,6 @@
 #include "TimeCtrl.h"
 
-TimeCtrl::TimeCtrl(Window *w, string n): key_msg(MSG_KEY, 's', NULL, NULL, n)
+TimeCtrl::TimeCtrl(Window *w, string n): key_msg(MSG_KEY, 's', NULL)
 {
   win = w;
   name = n;

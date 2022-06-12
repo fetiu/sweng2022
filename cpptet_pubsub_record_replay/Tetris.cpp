@@ -38,42 +38,13 @@ void Tetris::init(int *setOfBlockArrays[], int blkTypes, int blkDegrees) {
     for(int j = 0; j < nBlock.degree; ++j) {
       int len = blkArrayLength(setOfBlockArrays, i * nBlock.degree + j);
       setOfBlockObjects[i][j] = Matrix(setOfBlockArrays[i * nBlock.degree + j], len, len);
+      // 위에 new 안붙여도, 붙여도 정상 작동 함 , new 붙여야하나?
       if (maxLength < len) {
         maxLength = len;
       }
     }
   }
   iScreenDw = maxLength;
-}
-
-TetrisState Tetris::accept(Matrix *deletedLines) {
-  int dy = deletedLines->get_dy();
-  Matrix *tempScreen = iScreen->clip(dy, iScreenDw, iScreenD.y, iScreenDw + iScreenD.x);
-  iScreen->paste(tempScreen, 0, iScreenDw);
-  iScreen->paste(deletedLines, iScreenD.y - dy, iScreenDw);
-
-  int currBlkStateBottom = currBlkState.top + currBlk.get_dy();
-  int currBlkStateRight = currBlkState.left + currBlk.get_dx();
-  Matrix *tempBlk = iScreen->clip(currBlkState.top, currBlkState.left, currBlkStateBottom, currBlkStateRight);
-  tempBlk = tempBlk->add(&currBlk);
-
-  while(tempBlk->anyGreaterThan(1)) {
-    if (currBlkState.top == 0) {
-      state = Finished;
-      break;
-    }
-    currBlkState.top -= 1;
-    currBlkStateBottom = currBlkState.top + currBlk.get_dy();
-    currBlkStateRight = currBlkState.left + currBlk.get_dx();
-    tempBlk = iScreen->clip(currBlkState.top, currBlkState.left, currBlkStateBottom, currBlkStateRight);
-    tempBlk = tempBlk->add(&currBlk);
-  }
-
-  oScreen->paste(iScreen, 0, 0);
-  oScreen->paste(tempBlk, currBlkState.top, currBlkState.left);
-  
-  iScreenD.y -= dy; // reduce the screen depth
-  return state;
 }
 
 TetrisState Tetris::accept(char key) {
@@ -83,7 +54,7 @@ TetrisState Tetris::accept(char key) {
   
   if (key >= '0' && key <= ('0' + nBlock.type - 1)) {
     if (justStarted == false) {
-      state = deleteFullLines();
+      deleteFullLines();
     }
     iScreen->paste(oScreen, 0, 0);
     currBlkState.shape.type = key - '0';
@@ -163,7 +134,7 @@ int* Tetris::arrayScreen() {
   int aryScreenDy = iScreenD.y + iScreenDw;
   int aryScreenDx = iScreenD.x + iScreenDw * 2;
   
-  int *tempScreen = new int[aryScreenDy * aryScreenDx];
+  tempScreen = new int[aryScreenDy * aryScreenDx];
   memset(tempScreen, 0, sizeof(int) * aryScreenDy * aryScreenDx);
   
   for (int y = 0; y < iScreenD.y; ++y) {
@@ -181,49 +152,21 @@ int* Tetris::arrayScreen() {
   return tempScreen;
 }
 
-TetrisState Tetris::deleteFullLines() {
-  TetrisState s;
-
+void Tetris::deleteFullLines() {
   iScreen->paste(oScreen, 0, 0);
   int currBlkBottom = currBlkState.top + currBlk.get_dy();
   currBlkBottom = currBlkBottom < iScreenD.y ? currBlkBottom : iScreenD.y;
-
-  //extern void printwMatrix(Matrix *m);  
-  vector<Matrix *> deletedLines;
-  deletedLines.clear();
-  deletedLineNums.clear();
-  Matrix zeroBlk = Matrix(1, iScreenD.x);
+  
+  fullLine.clear();
   for (int line = currBlkState.top; line < currBlkBottom; ++line) {    
-    Matrix *tempBlk = iScreen->clip(line, iScreenDw, line + 1, iScreenDw + iScreenD.x);
-    if (iScreenD.x == tempBlk->sum()) {
-      //printwMatrix(tempBlk);
-      deletedLines.push_back(tempBlk);
-      deletedLineNums.push_back(line);
-      Matrix *tempScreen = iScreen->clip(0, iScreenDw, line, iScreenDw + iScreenD.x);
-      iScreen->paste(tempScreen, 1, iScreenDw);
-      iScreen->paste(&zeroBlk, 0, iScreenDw);
+    Matrix tempBlk = iScreen->clip(line, iScreenDw, line + 1, iScreenDw + iScreenD.x);
+    if (iScreenD.x == tempBlk.sum()) {
+      fullLine.push_back(line);
+      tempBlk = iScreen->clip(0, iScreenDw, line, iScreenDw + iScreenD.x);
+      iScreen->paste(&tempBlk, 1, iScreenDw);
     }
   }
-
-  if (oDeletedLines != NULL)
-    delete oDeletedLines;
-
-  if (deletedLines.size() > 0) {
-    oDeletedLines = new Matrix(deletedLines.size(), iScreenD.x);
-    for(int i = 0; i < deletedLines.size(); i++) {
-      //printwMatrix(deletedLines[i]);
-      oDeletedLines->paste(deletedLines[i], i, 0);
-    }
-    //printwMatrix(oDeletedLines);
-    s = RunningWDeletion;
-  }
-  else {
-    oDeletedLines = NULL;    
-    s = Running;
-  }
-
   oScreen->paste(iScreen, 0, 0);
-  return s;
 }
 
 Tetris::~Tetris() {
@@ -231,7 +174,7 @@ Tetris::~Tetris() {
     delete [] setOfBlockObjects[i];
   }
   delete [] setOfBlockObjects;
-  //delete [] tempScreen;
+  delete [] tempScreen;
   delete oScreen;
   delete iScreen;
 }

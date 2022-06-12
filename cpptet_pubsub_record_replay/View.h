@@ -3,18 +3,17 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-#include <fstream>
 
 #include "MsgPubSub.h"
 #include "Window.h"
 #include "Matrix.h"
 
-class Record: public Sub {
+class View: public Sub {
  private:
   Window *win;     // console window
-  ofstream fout;
-
+  Window *mwin;    // main window
+  
  public:
-  Record(Window *w, string n);
+  View(Window *w_main, Window *w_con, string n);
   void handle(Msg *msg);
 };

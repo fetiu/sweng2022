@@ -52,67 +52,32 @@ int *setOfCBlockArrays[] = {
 };
 
 extern void shutdown_whole_graph();
-Window *g_win = NULL;
 
-Model::Model(Window *w, string n, bool play_mode, bool replay_mode, string keys) //: omsg(MSG_MAT, 0, NULL, NULL)
+Model::Model(Window *w, string n, bool record_mode, bool replay_mode): omsg(MSG_MAT, 0, NULL)
 {
   win = w;
   name = n;
-  if (play_mode ^ replay_mode == 0) {
-    win->printw("Model: either PLAY or REPLAY can be specified!!");
+  if (record_mode ^ replay_mode == 0) {
+    win->printw("Model: either RECORD or REPLAY can be specified!!");
     shutdown_whole_graph();
   }
 
-  if (play_mode)
-    mode = ModelMode::PLAY;
+  if (record_mode)
+    mode = ModelMode::RECORD;
   else if (replay_mode)
     mode = ModelMode::REPLAY;
 
   CTetris::init(setOfCBlockArrays, MAX_BLK_TYPES, MAX_BLK_DEGREES);
   board = new CTetris(BOARD_HEIGHT, BOARD_WIDTH);
   state = TetrisState::NewBlock;
-  if (mode == ModelMode::PLAY)
+  if (mode == ModelMode::RECORD)
     srand((unsigned int)time(NULL));
-
-  if (keys.length() != 6) {
-    win->printw("Model: the number of keys is not 6!!");
-    shutdown_whole_graph();
-  }
-
-  const char *p = keys.c_str();
-  key_left = p[0];
-  key_right = p[1];
-  key_down = p[2];
-  key_rotate = p[3];
-  key_drop = p[4];
-  key_tdown = p[5];
-
-  g_win = win;
 };
-
-void printwMatrix(Matrix *m) {
-  int **array = m->get_array();
-  for (int y = 0; y < m->get_dy(); y++) {
-    for (int x = 0; x < m->get_dx(); x++)
-      g_win->printw(to_string(array[y][x]));
-    g_win->printw("\n");
-  }
-}
 
 void Model::output_message(char key)
 {
-    Msg omsg(0, 0, NULL, NULL, name);
-    omsg.what = MSG_KEY_MAT_MAT2;
+    omsg.what = MSG_KEY_MAT;
     omsg.mat = board->oCScreen->clip(0, board->iScreenDw, BOARD_HEIGHT, board->iScreenDw+BOARD_WIDTH);
-    //win->printw("Model: state = " + to_string(state)  + "\n");
-    if (state == TetrisState::RunningWDeletion) {
-      omsg.mat2 = new Matrix(board->oDeletedCLines);
-      //printwMatrix(board->oDeletedCLines);
-      //board->accept(board->oDeletedCLines);
-      //board->accept(board->oDeletedCLines);
-    }
-    else
-      omsg.mat2 = NULL;
     omsg.key = key;
     notifySubs(&omsg);
 }
@@ -130,12 +95,6 @@ void Model::handle_newblock(void)
 
 void Model::handle(Msg *msg)
 {
-  if (msg->name != "time_ctrl" && msg->name != "kbd_ctrl") {
-    if (((msg->what & MSG_MAT2) == MSG_MAT2) && msg->mat2 != NULL)
-      board->accept(msg->mat2);
-    return;
-  }
-
   if ((msg->what & MSG_KEY) != MSG_KEY)
     return;
 
@@ -145,30 +104,18 @@ void Model::handle(Msg *msg)
     shutdown_whole_graph();
   }
 
-  if (key == 's' && key != key_down && msg->name == "kbd_ctrl")
-    return; // accept 's' from kbd_ctrl only for left_model
-
-  char key2;
-  if (key == key_left) key2 = 'a';
-  else if (key == key_right) key2 = 'd';
-  else if (key == key_down) key2 = 's';
-  else if (key == key_rotate) key2 = 'w';
-  else if (key == key_drop) key2 = ' ';
-  else if (key == key_tdown) key2 = 's';
-  else return;
-
-  if (state == TetrisState::NewBlock && mode == ModelMode::PLAY)
+  if (state == TetrisState::NewBlock && mode == ModelMode::RECORD)
     handle_newblock();
 
   //win->printw(name + ": key = " + key + "\n");
-  state = board->accept(key2);
-  output_message(key2);
+  state = board->accept(key);
+  output_message(key);
   if (state == TetrisState::Finished && mode == ModelMode::REPLAY) {
     win->printw("Model: Game over!!\n");
     shutdown_whole_graph();
   }
 
-  if (state == TetrisState::NewBlock && mode == ModelMode::PLAY)
+  if (state == TetrisState::NewBlock && mode == ModelMode::RECORD)
     handle_newblock();
 
 }

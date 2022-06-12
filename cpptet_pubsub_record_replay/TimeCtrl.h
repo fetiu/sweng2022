@@ -1,18 +1,17 @@
 #pragma once
 
 #include <unistd.h>
-#include <fstream>
 
 #include "MsgPubSub.h"
 #include "Window.h"
 
-class Replay: public Sub, public Pub {
+class TimeCtrl: public Sub, public Pub {
  private:
   Window *win; // console window
-  ifstream fin;
+  Msg key_msg; // msg to publish
 
  public:
-  Replay(Window *w, string n);
+  TimeCtrl(Window *w, string n);
   void run();
   void handle(Msg *msg);
 };

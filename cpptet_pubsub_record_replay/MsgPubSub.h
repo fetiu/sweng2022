@@ -10,14 +10,12 @@
 #define MSG_END (-1)
 #define MSG_KEY  (1)
 #define MSG_MAT (2)
-#define MSG_MAT2 (4)
 #define MSG_KEY_MAT (MSG_KEY | MSG_MAT)
-#define MSG_KEY_MAT_MAT2 (MSG_KEY | MSG_MAT | MSG_MAT2)
 
 class Msg {
  public:
-  Msg() { what = 0; key = 0; mat = NULL; mat2 = NULL; name = ""; }
-  Msg(int w, char k, Matrix *m, Matrix *m2, string n) { what = w; key = k; mat = m; mat2 = m2; name = n; }
+  Msg(int w, char k, Matrix *m) { what = w; key = k; mat = m; }
+#if 1 // added by khkim
   Msg(Msg *msg) { // copy constructor
     what = msg->what; 
     key = msg->key; 
@@ -25,26 +23,15 @@ class Msg {
       mat = new Matrix(msg->mat);  // deep copy
     else
       mat = NULL;
-
-    if (msg->mat2 != NULL)
-      mat2 = new Matrix(msg->mat2);  // deep copy
-    else
-      mat2 = NULL;
-    
-    name = msg->name;
   } 
   ~Msg() {  // destructor
     if (mat != NULL) 
       delete mat; 
-    if (mat2 != NULL) 
-      delete mat2; 
   }
-
+#endif
   int what; // 1 (MSG_KEY), 2 (MSG_MAT)
   char key;
-  Matrix *mat; // for oCScreen
-  Matrix *mat2; // for oDeletedCLines
-  string name; // message sender
+  Matrix *mat;
 };
 
 class Sub {

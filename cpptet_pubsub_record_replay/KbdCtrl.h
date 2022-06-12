@@ -1,18 +1,19 @@
 #pragma once
 
 #include <unistd.h>
-#include <fstream>
 
 #include "MsgPubSub.h"
 #include "Window.h"
 
-class Replay: public Sub, public Pub {
+class KbdCtrl: public Sub, public Pub {
  private:
   Window *win; // console window
-  ifstream fin;
+  Msg omsg; // msg with a key
+  bool isStdinReadable();
+  char getChar(); 
 
  public:
-  Replay(Window *w, string n);
+  KbdCtrl(Window *w, string n);
   void run();
   void handle(Msg *msg);
 };

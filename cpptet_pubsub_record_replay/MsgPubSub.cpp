@@ -2,11 +2,18 @@
 
 void Sub::update(Msg *m) 
 {
+#if 1 // added by khkim
   Msg *m_copy = new Msg(m);
   mtx.lock();
   que.push(m_copy);
   cv.notify_all();
   mtx.unlock();
+#else
+  mtx.lock();
+  que.push(m);
+  cv.notify_all();
+  mtx.unlock();
+#endif
 }
 
 void Sub::run() 
@@ -27,7 +34,9 @@ void Sub::run()
 
     handle(msg);
   
+#if 1 // added by khkim
     delete msg; 
+#endif
   }
   //win->printw(name + ".run() ends.\n");
 };
