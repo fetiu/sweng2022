@@ -134,6 +134,12 @@ void Model::console_print(string s)
 
 void Model::handle(Msg *msg)
 {
+  if (msg->name == "RightModel" || msg->name == "LeftModel") {
+    if (((msg->what & MSG_MAT2) == MSG_MAT2) && msg->mat2 != NULL)
+      board->accept(msg->mat2);
+    return;
+  }
+
   if ((msg->what & MSG_KEY) != MSG_KEY)
     return;
 

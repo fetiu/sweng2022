@@ -164,29 +164,45 @@ int main(int argc, char *argv[])
     socklen_t addr_client_len = sizeof(addr_client_len);
     int sd = listen_socket(atoi(argv[2]));
 
-    int cd = accept(sd, (sockaddr*) &addr_client, &addr_client_len);
-    if(cd < 0){
+    int cd1 = accept(sd, (sockaddr*) &addr_client, &addr_client_len);
+    if(cd1 < 0){
         cout << "accept error" << endl;
         exit(1);
     }
 
-    SendCtrl *send_ctrl = new SendCtrl(&bttm_win, "SendCtrl", cd);
-    sub_list.push_back(send_ctrl);
-    RecvCtrl *recv_ctrl = new RecvCtrl(&bttm_win, "RecvCtrl", cd);
-    sub_list.push_back(recv_ctrl);
+    int cd2 = accept(sd, (sockaddr *)&addr_client, &addr_client_len);
+    if (cd2 < 0) {
+      cout << "accept error" << endl;
+      exit(1);
+    }
 
-    recv_ctrl->addSubs(send_ctrl);
+    SendCtrl *send_ctrl1 = new SendCtrl(&bttm_win, "SendCtrl1", cd1);
+    sub_list.push_back(send_ctrl1);
+    RecvCtrl *recv_ctrl1 = new RecvCtrl(&bttm_win, "RecvCtrl1", cd1);
+    sub_list.push_back(recv_ctrl1);
+    SendCtrl *send_ctrl2 = new SendCtrl(&bttm_win, "SendCtrl2", cd2);
+    sub_list.push_back(send_ctrl2);
+    RecvCtrl *recv_ctrl2 = new RecvCtrl(&bttm_win, "RecvCtrl2", cd2);
+    sub_list.push_back(recv_ctrl2);
 
-    task = new thread(&SendCtrl::run, send_ctrl);
+    recv_ctrl1->addSubs(send_ctrl2);
+    recv_ctrl2->addSubs(send_ctrl1);
+
+    task = new thread(&SendCtrl::run, send_ctrl1);
     task_list.push_back(task);
-    task = new thread(&RecvCtrl::run, recv_ctrl);
+    task = new thread(&RecvCtrl::run, recv_ctrl1);
+    task_list.push_back(task);
+    task = new thread(&SendCtrl::run, send_ctrl2);
+    task_list.push_back(task);
+    task = new thread(&RecvCtrl::run, recv_ctrl2);
     task_list.push_back(task);
   
     // wait for each task to be terminated
     for (int i=0; i < task_list.size(); i++)
       task_list[i]->join();
     
-    close(cd);
+    close(cd1);
+    close(cd2);
     close(sd);
   }
   else if (client_mode) {
@@ -217,12 +233,12 @@ int main(int argc, char *argv[])
     // connect tasks to compose the graph
     left_model->addSubs(left_view);
     left_model->addSubs(send_ctrl);
-    //left_model->addSubs(right_model);
+    left_model->addSubs(right_model);
     time_ctrl->addSubs(left_model);
     kbd_ctrl->addSubs(left_model);
 
     right_model->addSubs(right_view);
-    //right_model->addSubs(left_model);
+    right_model->addSubs(left_model);
     recv_ctrl->addSubs(right_model);
 
     // run a thread for each task
